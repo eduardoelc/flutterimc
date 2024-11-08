@@ -1,6 +1,6 @@
 {
-    "name": "flutterimc",
-    "short_name": "flutterimc",
+    "name": "flutterimcapp",
+    "short_name": "flutterimcapp",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
