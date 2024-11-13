@@ -15,7 +15,7 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Main Page",
+          "Histórico de IMC",
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.blue,

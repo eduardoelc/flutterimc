@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutterimcapp/pages/dados_pessoa_page.dart';
 
 class CustonDrawer extends StatelessWidget {
   const CustonDrawer({super.key});
@@ -42,7 +43,7 @@ class CustonDrawer extends StatelessWidget {
                   backgroundColor: Colors.white,
                   radius: 25.0,
                   foregroundImage: NetworkImage(
-                      "https://lh3.googleusercontent.com/a-/ALV-UjXpkYtscsuqHvBpxTCHQl26eqoRBdKJa4GXNpsCazzFZmJfsdrHHa-IOGRhbE2uFVOzxrFxe2097FdRZbuaVg3f95al079bq0Cfl9zOZ_3fo_XoVfmIEwL0APB1ikhlJP4V1dCLNictwGAZHdN92RuCWwjOndg1HcdLdlNwtxUqB_0KdLERO6nlpvrlI6SRSY5QcG_UhaxS-ymIwkXX7ijQl9SG99j9HOHg5g_at4Sn92_aqa_SIgNaA9o1uCO1taKPcxFh7GAO5soqPVr5cxk0UF0lQD-bj87MqOLMJQuNn7XxldvkHqPb1StuSXpOT-2B4aRAd36VwLBF-TAeK9WcTD7d9Acu1dEz6PSHMG5oQHxlG68fkbUAC7SFeK2AcPfoX5-k5Jm_lWIY6Lk4SGSV1uOrYyp3ol_RjLpcKu_pfNFDXx9maklnTkOm6gAZh5L_ieyuEORLLGzrdGjOheYxZzA32P_x52ra9Giw7i5Q0DiFoyMErZaSIkXiSk3M8pZwBROXJUjjNWRG51Leve5laFXfLJ-nxCnY32quDCdgsbZPXfu59EZQUoe-WGNtnIGvgZapDYi9mvTyi6159ElA33UvefznRjQd4nSE4UHI6bIFIFAK4OfsC_vX_uBH8KEgSY5dnnedpRcyGB6uGbkk6bZ8OsYwzLNHhr-oIyQiG1-lLIRKNymH8OqtpQgaNA1N0tBOJa5RPseHq13HTmCOtbLfM87e1Q1O01s3x2dFQDm4BX4n1YKqs9WXy8vHhoemHkCOSRyhAd10SICtjD8W-1P9abjWwd6m8VrQnjfnAaeJTpPI8BDXiInrrbOx36pCm0W-xNgbftXOw_C1rw4HR9VF7jibBRMX-lqeom1ZRmduxxxFLohkUE41ClskevASN7Ufbefb2YOB_8_RygZMqISSXSKoMYXThX9nmOgTORId7J0WRY0Ef5rrM4-Hi5683AVhERlesh0LuYgPtkcfrp7J=s360-c-no"),
+                      "https://i0.wp.com/www.vidanatural.org.br/wp-content/uploads/2019/12/%C3%8Dndice-de-Massa-Corporal-scaled.jpg"),
                 ),
                 accountName: Text("Email"),
                 accountEmail: Text("Email@email.com")),
@@ -63,11 +64,8 @@ class CustonDrawer extends StatelessWidget {
                 )),
             onTap: () {
               Navigator.pop(context);
-              // Navigator.push(
-              //     context,
-              //     MaterialPageRoute(
-              //         builder: (context) =>
-              //             const DadosCadastraisSharedPreferencesPage()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => DadosPessoaPage()));
             },
           ),
         ],
