@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.eduardoelc.flutterimc" "\0"
-            VALUE "FileDescription", "flutterimc" "\0"
+            VALUE "CompanyName", "com.eduardoelc.flutterimcapp" "\0"
+            VALUE "FileDescription", "flutterimcapp" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "flutterimc" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 com.eduardoelc.flutterimc. All rights reserved." "\0"
-            VALUE "OriginalFilename", "flutterimc.exe" "\0"
-            VALUE "ProductName", "flutterimc" "\0"
+            VALUE "InternalName", "flutterimcapp" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024 com.eduardoelc.flutterimcapp. All rights reserved." "\0"
+            VALUE "OriginalFilename", "flutterimcapp.exe" "\0"
+            VALUE "ProductName", "flutterimcapp" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
