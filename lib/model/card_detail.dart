@@ -1,17 +1,23 @@
 class CardDetail {
   int _id;
+  int _pessoaId;
   double _peso;
   double _altura;
   double _imc;
-  DateTime _data;
+  String _data;
   String _classificacao;
 
-  CardDetail(this._id, this._peso, this._altura, this._imc, this._data,
-      this._classificacao);
+  CardDetail(this._id, this._pessoaId, this._peso, this._altura, this._imc,
+      this._data, this._classificacao);
 
   int get id => _id;
   set id(int id) {
     _id = id;
+  }
+
+  int get pessoaId => _pessoaId;
+  set pessoaId(int pessoaId) {
+    _pessoaId = pessoaId;
   }
 
   double get peso => _peso;
@@ -29,8 +35,8 @@ class CardDetail {
     _imc = imc;
   }
 
-  DateTime get data => _data;
-  set data(DateTime data) {
+  String get data => _data;
+  set data(String data) {
     _data = data;
   }
 
@@ -39,9 +45,33 @@ class CardDetail {
     _classificacao = classificacao;
   }
 
+  Map<String, dynamic> toMap() {
+    return {
+      'id': _id,
+      'pessoaId': _pessoaId,
+      'peso': _peso,
+      'altura': _altura,
+      'imc': _imc,
+      'data': _data,
+      'classificacao': _classificacao,
+    };
+  }
+
+  factory CardDetail.fromMap(Map<String, dynamic> map) {
+    return CardDetail(
+      map['id'],
+      map['pessoaId'],
+      map['peso'],
+      map['altura'],
+      map['imc'],
+      map['data'] is String ? DateTime.parse(map['data']) : map['data'],
+      map['classificacao'],
+    );
+  }
+
   // Sobrescrevendo o método toString() para representar o objeto como uma string legível
   @override
   String toString() {
-    return 'CardDetail{id: $_id, peso: $_peso, altura: $_altura, imc: $_imc, data: $_data, classificacao: $_classificacao}';
+    return 'CardDetail{id: $_id, pessoaId: $_pessoaId, peso: $_peso, altura: $_altura, imc: $_imc, data: $_data, classificacao: $_classificacao}';
   }
 }
