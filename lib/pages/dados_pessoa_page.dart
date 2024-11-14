@@ -3,6 +3,10 @@ import 'package:flutterimcapp/model/pessoa_model.dart';
 import 'package:flutterimcapp/repositories/dados_pessoa_repository.dart';
 
 class DadosPessoaPage extends StatefulWidget {
+  final PessoaModel? pessoa;
+
+  DadosPessoaPage({this.pessoa});
+
   @override
   _DadosPessoaPageState createState() => _DadosPessoaPageState();
 }
@@ -13,21 +17,16 @@ class _DadosPessoaPageState extends State<DadosPessoaPage> {
   final alturaController = TextEditingController();
   final formKey = GlobalKey<FormState>();
   String imcResultado = "";
-  final DadosPessoaRepository pessoaRepository =
-      DadosPessoaRepository(); // Repositório
-  PessoaModel? pessoaEditando; // Para armazenar a pessoa editada
+
+  final DadosPessoaRepository pessoaRepository = DadosPessoaRepository();
+  PessoaModel? pessoaEditando;
 
   @override
   void initState() {
     super.initState();
-    // Verifica se já existe uma pessoa cadastrada
-    _carregarDados();
-  }
-
-  void _carregarDados() async {
-    pessoaEditando = pessoaRepository.obterPessoa();
-    print(pessoaEditando.toString());
-    if (pessoaEditando != null) {
+    if (widget.pessoa != null) {
+      // Se uma pessoa for passada para edição
+      pessoaEditando = widget.pessoa;
       nomeController.text = pessoaEditando!.nome;
       pesoController.text = pessoaEditando!.peso.toString();
       alturaController.text = pessoaEditando!.altura.toString();
@@ -35,18 +34,22 @@ class _DadosPessoaPageState extends State<DadosPessoaPage> {
     }
   }
 
-  void _salvarCadastro() {
+  void _salvarCadastro() async {
     if (formKey.currentState?.validate() ?? false) {
       String nome = nomeController.text;
-      double peso = double.tryParse(pesoController.text) ?? 0;
-      double altura = double.tryParse(alturaController.text) ?? 0;
+      double peso =
+          double.tryParse(pesoController.text.replaceAll(",", ".")) ?? 0;
+      double altura =
+          double.tryParse(alturaController.text.replaceAll(",", ".")) ?? 0;
 
-      // Criando ou atualizando a pessoa
-      PessoaModel pessoa = PessoaModel(nome, peso, altura, 0);
+      // Se estiver editando, atualiza, senão cria uma nova pessoa
+      int id = pessoaEditando?.id ??
+          DateTime.now().millisecondsSinceEpoch; // ID único para nova pessoa
+      PessoaModel pessoa = PessoaModel(id, nome, peso, altura, 0);
       pessoaRepository.calcularIMC(pessoa);
 
       // Salva ou atualiza a pessoa no repositório
-      pessoaRepository.adicionarOuAtualizarPessoa(pessoa);
+      await pessoaRepository.adicionarOuAtualizarPessoa(pessoa);
 
       setState(() {
         imcResultado = "IMC Calculado: ${pessoa.imc.toStringAsFixed(2)}";
@@ -56,8 +59,8 @@ class _DadosPessoaPageState extends State<DadosPessoaPage> {
       nomeController.clear();
       pesoController.clear();
       alturaController.clear();
-      pessoaEditando = pessoa;
-      _carregarDados();
+
+      Navigator.pop(context); // Retorna à tela de listagem
     }
   }
 
@@ -65,8 +68,11 @@ class _DadosPessoaPageState extends State<DadosPessoaPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text(pessoaEditando == null ? "Cadastrar Pessoa" : "Editar Pessoa"),
+        title: Text(
+          (pessoaEditando == null ? "Cadastrar Pessoa" : "Editar Pessoa"),
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.blue,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -89,13 +95,12 @@ class _DadosPessoaPageState extends State<DadosPessoaPage> {
               TextFormField(
                 controller: pesoController,
                 decoration: const InputDecoration(labelText: "Peso (kg)"),
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor, insira o peso';
                   }
-                  if (double.tryParse(value) == null) {
+                  if (double.tryParse(value.replaceAll(",", ".")) == null) {
                     return 'Por favor, insira um número válido';
                   }
                   return null;
@@ -105,13 +110,12 @@ class _DadosPessoaPageState extends State<DadosPessoaPage> {
               TextFormField(
                 controller: alturaController,
                 decoration: const InputDecoration(labelText: "Altura (m)"),
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor, insira a altura';
                   }
-                  if (double.tryParse(value) == null) {
+                  if (double.tryParse(value.replaceAll(",", ".")) == null) {
                     return 'Por favor, insira um número válido';
                   }
                   return null;

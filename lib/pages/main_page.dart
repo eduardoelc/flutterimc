@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutterimcapp/pages/imc_page.dart';
+import 'package:flutterimcapp/pages/reristro_ultimo_imc.dart';
 import 'package:flutterimcapp/shared/widgets/custon_drawer.dart';
 
 class MainPage extends StatefulWidget {
@@ -24,7 +24,8 @@ class _MainPageState extends State<MainPage> {
       body: const Column(
         children: [
           Expanded(
-            child: ImcPage(),
+            // child: ImcPage(),
+            child: ReristroUltimoImcPage(),
           ),
         ],
       ),
