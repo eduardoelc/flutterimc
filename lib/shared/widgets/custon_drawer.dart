@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutterimcapp/pages/dados_pessoa_page.dart';
+import 'package:flutterimcapp/pages/lista_pessoas_page.dart';
 
 class CustonDrawer extends StatelessWidget {
   const CustonDrawer({super.key});
@@ -7,59 +8,38 @@ class CustonDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: ListView(
+      child: Column(
         // crossAxisAlignment: CrossAxisAlignment.start,
-        padding: EdgeInsets.zero,
+        // padding: EdgeInsets.zero,
         children: [
-          InkWell(
-            onTap: () {
-              showModalBottomSheet(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  context: context,
-                  builder: (BuildContext bc) {
-                    return Wrap(
-                      children: [
-                        ListTile(
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                          title: const Text("Camera"),
-                          leading: const Icon(Icons.camera),
-                        ),
-                        ListTile(
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                          title: const Text("Galeria"),
-                          leading: const Icon(Icons.image_outlined),
-                        )
-                      ],
-                    );
-                  });
-            },
-            child: const UserAccountsDrawerHeader(
-                currentAccountPicture: CircleAvatar(
-                  backgroundColor: Colors.white,
-                  radius: 25.0,
-                  foregroundImage: NetworkImage(
-                      "https://i0.wp.com/www.vidanatural.org.br/wp-content/uploads/2019/12/%C3%8Dndice-de-Massa-Corporal-scaled.jpg"),
-                ),
-                accountName: Text("Email"),
-                accountEmail: Text("Email@email.com")),
+          const UserAccountsDrawerHeader(
+            currentAccountPicture: CircleAvatar(
+              backgroundColor: Colors.white,
+              radius: 25.0,
+              foregroundImage: NetworkImage(
+                  "https://i0.wp.com/www.vidanatural.org.br/wp-content/uploads/2019/12/%C3%8Dndice-de-Massa-Corporal-scaled.jpg"),
+            ),
+            accountName: Text("Email"),
+            accountEmail: Text("Email@email.com"),
           ),
-          InkWell(
-            child: Container(
+          ListTile(
+            title: Container(
                 padding:
                     const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
                 width: double.infinity,
                 child: const Row(
                   children: [
-                    Icon(Icons.person),
+                    Icon(
+                      Icons.person_add,
+                      size: 30,
+                    ),
                     SizedBox(
                       width: 5,
                     ),
-                    Text("Dados Pessoais"),
+                    Text(
+                      "Cadastrar Pessoa",
+                      style: TextStyle(fontSize: 18),
+                    ),
                   ],
                 )),
             onTap: () {
@@ -67,6 +47,47 @@ class CustonDrawer extends StatelessWidget {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => DadosPessoaPage()));
             },
+          ),
+          const Divider(
+            height: 2,
+          ),
+          ListTile(
+            title: Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
+                width: double.infinity,
+                child: const Row(
+                  children: [
+                    Icon(
+                      Icons.list,
+                      size: 30,
+                    ),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    Text(
+                      "Lista de Pessoas",
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ],
+                )),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => ListaPessoasPage()));
+            },
+          ),
+          const Spacer(),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Texto na parte inferior',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[700],
+              ),
+            ),
           ),
         ],
       ),

@@ -1,23 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutterimcapp/model/card_detail.dart';
+import 'package:flutterimcapp/model/pessoa_model.dart';
 import 'package:flutterimcapp/repositories/card_detail_repository.dart';
+import 'package:flutterimcapp/repositories/dados_pessoa_repository.dart';
 import 'package:flutterimcapp/repositories/imc_classificacao_repository.dart';
-import 'package:flutterimcapp/shared/widgets/text_label.dart';
+import 'package:flutterimcapp/shared/widgets/column_info.dart';
 import 'package:intl/intl.dart';
 
 class ImcPage extends StatefulWidget {
-  const ImcPage({super.key});
+  final int id;
+  const ImcPage({super.key, required this.id});
 
   @override
   State<ImcPage> createState() => _ImcPageState();
 }
 
 class _ImcPageState extends State<ImcPage> {
+  late int pessoaId;
   var alturaController = TextEditingController();
   var pesoController = TextEditingController();
-  var cardDetailRepository = CardDetailRepository();
+  var classificacao = "Normal";
+  PessoaModel? selectedPessoa;
 
+  var cardDetailRepository = CardDetailRepository();
   var classificacaoRepo = ImcClassificacaoRepository();
+  var pessoaRepository = DadosPessoaRepository();
 
   DateTime now = DateTime.now();
 
@@ -25,16 +32,23 @@ class _ImcPageState extends State<ImcPage> {
 
   @override
   void initState() {
-    super.initState();
+    pessoaId = widget.id;
     carregarDados();
+    super.initState();
   }
 
   // Carrega os dados do repositório
   void carregarDados() async {
     try {
-      final dados = await cardDetailRepository.listar();
+      List<CardDetail> dados = await cardDetailRepository.listar(pessoaId);
+      PessoaModel? pessoa = await pessoaRepository.obterPessoa(pessoaId);
       setState(() {
         _cardDetail = dados;
+        if (pessoa != null) {
+          selectedPessoa = pessoa;
+        } else {
+          selectedPessoa = null;
+        }
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -43,24 +57,23 @@ class _ImcPageState extends State<ImcPage> {
     }
   }
 
-  // Função para construir o campo de texto
-  Widget _buildTextField(
-      {required String hintText, required TextEditingController controller}) {
-    return Padding(
-      padding: const EdgeInsets.all(5),
-      child: TextFormField(
-        keyboardType: TextInputType.number,
-        decoration: InputDecoration(hintText: hintText),
-        controller: controller,
-      ),
-    );
+  void limparDados() {
+    setState(() {
+      _cardDetail.clear();
+    });
   }
 
-  // Função para adicionar um novo registro
-  void _adicionarRegistro() async {
+  void adicionarRegistro() async {
     if (alturaController.text.isEmpty || pesoController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, preencha todos os campos.')),
+      );
+      return;
+    }
+
+    if (selectedPessoa == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Selecione uma pessoa')),
       );
       return;
     }
@@ -72,10 +85,10 @@ class _ImcPageState extends State<ImcPage> {
 
       String classificacao = classificacaoRepo.obterClassificacao(imc);
 
-      // Adiciona o novo registro ao repositório
-      await cardDetailRepository
-          .adicionar(CardDetail(0, peso, altura, imc, now, classificacao));
+      await cardDetailRepository.salvar(CardDetail(0, selectedPessoa!.id, peso,
+          altura, imc, now.toIso8601String(), classificacao));
       Navigator.pop(context);
+      limparDados();
       carregarDados();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -84,29 +97,41 @@ class _ImcPageState extends State<ImcPage> {
     }
   }
 
-  // Função para deletar um item
-  void _deletarRegistro(CardDetail cardDetail, int index) {
-    cardDetailRepository.remove(cardDetail.id);
+  void deletarRegistro(CardDetail cardDetail, int index) async {
+    try {
+      setState(() {
+        _cardDetail.removeAt(index);
+      });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Item "${cardDetail.id}" removido com sucesso.')),
-    );
+      await cardDetailRepository.remover(cardDetail.id);
 
-    setState(() {
-      _cardDetail.removeAt(index);
-    });
-
-    carregarDados();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Item "${cardDetail.id}" removido com sucesso.')),
+      );
+      limparDados();
+      carregarDados();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao remover o registro: $e')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Registro de IMC',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.blue,
+      ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () async {
-          alturaController.clear();
-          pesoController.clear();
+          alturaController.text = selectedPessoa!.altura.toString();
 
           showDialog(
             context: context,
@@ -136,7 +161,7 @@ class _ImcPageState extends State<ImcPage> {
                     child: const Text("Cancelar"),
                   ),
                   TextButton(
-                    onPressed: _adicionarRegistro,
+                    onPressed: adicionarRegistro,
                     child: const Text("Salvar"),
                   ),
                 ],
@@ -149,6 +174,67 @@ class _ImcPageState extends State<ImcPage> {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Column(
           children: [
+            selectedPessoa?.id == null
+                ? Container()
+                : Card(
+                    color: const Color.fromARGB(255, 255, 255, 255),
+                    margin: const EdgeInsets.all(8.0),
+                    elevation: 4,
+                    shadowColor: Colors.blueGrey,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    child: ListTile(
+                      title: Container(
+                        padding: const EdgeInsets.only(bottom: 4.0),
+                        decoration: const BoxDecoration(
+                          border: Border(
+                              bottom:
+                                  BorderSide(color: Colors.black87, width: 2)),
+                        ),
+                        child: Text(
+                          selectedPessoa!.nome,
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              InfoColumn(
+                                label: 'Peso Inicial',
+                                value: "${selectedPessoa!.peso} kg",
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                              ),
+                              InfoColumn(
+                                label: 'Altura Inicial',
+                                value: "${selectedPessoa!.altura} m",
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                              ),
+                              InfoColumn(
+                                label: 'IMC Inicial',
+                                value: selectedPessoa!.imc.toStringAsFixed(2),
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              InfoColumn(
+                                label: 'Clarificação Inicial',
+                                value: classificacaoRepo
+                                    .obterClassificacao(selectedPessoa!.imc),
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
             Expanded(
               child: _cardDetail.isEmpty
                   ? const Center(
@@ -162,51 +248,77 @@ class _ImcPageState extends State<ImcPage> {
                       itemCount: _cardDetail.length,
                       itemBuilder: (BuildContext context, int index) {
                         var cardDetail = _cardDetail[index];
-                        // debugPrint(cardDetail.toString());
                         return Dismissible(
                           key: Key(cardDetail.id.toString()),
                           onDismissed: (DismissDirection direction) {
-                            _deletarRegistro(cardDetail, index);
+                            deletarRegistro(cardDetail, index);
                           },
                           direction: DismissDirection.horizontal,
                           child: Hero(
-                            tag: cardDetail.id,
+                            tag: 'card_${cardDetail.id}',
                             child: Card(
                               elevation: 8,
                               shadowColor: Colors.grey,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 8),
+                                    horizontal: 16, vertical: 12),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                          MainAxisAlignment.center,
                                       children: [
-                                        _buildInfoColumn(
-                                            "Altura (m)",
-                                            cardDetail.altura.toString(),
-                                            CrossAxisAlignment.center),
-                                        _buildInfoColumn(
-                                            "Peso (kg)",
-                                            cardDetail.peso.toString(),
-                                            CrossAxisAlignment.center),
-                                        _buildInfoColumn(
-                                            "IMC",
-                                            cardDetail.imc.toStringAsFixed(2),
-                                            CrossAxisAlignment.center),
+                                        const Icon(Icons.timer_outlined),
+                                        const SizedBox(
+                                          width: 5,
+                                        ),
+                                        InfoColumn(
+                                            label:
+                                                DateFormat('dd/MM/yyyy - hh:mm')
+                                                    .format(DateTime.parse(
+                                                        cardDetail.data)),
+                                            value: "",
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center),
                                       ],
                                     ),
-                                    _buildInfoColumn(
-                                        "Classificação",
-                                        cardDetail.classificacao,
-                                        CrossAxisAlignment.start),
-                                    _buildInfoColumn(
-                                        "Data de Registro",
-                                        DateFormat('dd/MM/yyyy - hh:mm')
-                                            .format(cardDetail.data),
-                                        CrossAxisAlignment.start),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        InfoColumn(
+                                            label: "Peso (kg)",
+                                            value: cardDetail.peso.toString(),
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center),
+                                        InfoColumn(
+                                            label: "Altura (m)",
+                                            value: cardDetail.altura.toString(),
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center),
+                                        InfoColumn(
+                                            label: "IMC",
+                                            value: cardDetail.imc
+                                                .toStringAsFixed(2),
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        InfoColumn(
+                                            label: "Classificação",
+                                            value: cardDetail.classificacao,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center),
+                                      ],
+                                    ),
                                   ],
                                 ),
                               ),
@@ -222,18 +334,21 @@ class _ImcPageState extends State<ImcPage> {
     );
   }
 
-  // Função para construir as informações
-  Widget _buildInfoColumn(
-      String label, String value, CrossAxisAlignment crossAxisAlignment) {
-    return Column(
-      crossAxisAlignment: crossAxisAlignment,
-      children: [
-        TextLabel(texto: label),
-        Text(
-          value,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w100),
+  // Função para construir o campo de texto
+  Widget _buildTextField(
+      {required String hintText, required TextEditingController controller}) {
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: TextFormField(
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+          hintText: hintText,
+          border: OutlineInputBorder(),
+          filled: true,
+          fillColor: Colors.grey[200],
         ),
-      ],
+        controller: controller,
+      ),
     );
   }
 }
