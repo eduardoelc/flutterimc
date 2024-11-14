@@ -12,7 +12,6 @@ class ImcClassificacaoRepository {
   }
 
   String obterClassificacao(double imc) {
-    // Obtemos a lista de classificações
     var classificacoes = informeClassificacao();
 
     // Verifica em qual faixa o IMC se encaixa
@@ -20,12 +19,12 @@ class ImcClassificacaoRepository {
       var intervalo = faixa[0];
       var descricao = faixa[1];
 
-      // Verificar se o intervalo contém a palavra "menos" ou "acima"
+      // Verificar se o intervalo contém a palavra "Menos" ou "Acima"
       if (intervalo.contains("Menos")) {
         double limite =
             double.parse(intervalo.split(' ')[2].replaceAll(",", "."));
         if (imc < limite) return descricao;
-      } else if (intervalo.contains("acima")) {
+      } else if (intervalo.contains("Acima")) {
         double limite =
             double.parse(intervalo.split(' ')[2].replaceAll(",", "."));
         if (imc >= limite) return descricao;
